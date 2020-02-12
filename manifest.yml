@@ -1,0 +1,7 @@
+applications:
+  - name: market-data-analysis
+    buildpack: https://github.com/cloudfoundry/java-buildpack.git#v4.16
+    path: target\analysis-0.0.1-SNAPSHOT.jar 
+    memory: 2g
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
