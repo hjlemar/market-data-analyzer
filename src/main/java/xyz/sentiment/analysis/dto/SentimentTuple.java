@@ -1,5 +1,7 @@
 package xyz.sentiment.analysis.dto;
 
+import java.time.Instant;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.influxdb.annotation.Column;
@@ -12,14 +14,20 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Measurement(name = "memory")
+@Measurement(name = "sentiment")
 public class SentimentTuple{
-    private String id;
+
 
     @Column(name = "time")
-    private long datetime;
+    private Instant datetime;
 
-    @Column(name = "sentiment")
+    @Column(name = "value")
     private Double sentiment;
+
+    @Column(name = "ticker" )
+    private String ticker;
+
+    public SentimentTuple(){        
+    }
     
 }

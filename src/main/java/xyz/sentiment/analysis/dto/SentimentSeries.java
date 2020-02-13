@@ -12,11 +12,6 @@ public class SentimentSeries {
     private List<SentimentTuple> data = new ArrayList<>();
 
     public void add(SentimentTuple tuple){
-        for (SentimentTuple item: data){
-            if(tuple.getId().equals(item.getId())){
-                return;
-            }
-        }
         data.add(tuple);
     }
 }

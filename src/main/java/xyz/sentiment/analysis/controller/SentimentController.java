@@ -41,7 +41,7 @@ public class SentimentController {
 
     @ApiOperation(value = "Generate Sentiment")
     @PostMapping(value="{ticker}")
-    public ResponseEntity<IEXNews> postMethodName(@RequestBody IEXNews entity, @PathVariable(name="ticker") final String ticker) {
+    public ResponseEntity<IEXNews> postNews(@RequestBody IEXNews entity, @PathVariable(name="ticker") final String ticker) {
         
         service.computeSentiment(ticker, entity);
         return ResponseEntity.accepted().build();

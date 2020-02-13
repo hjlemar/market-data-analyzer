@@ -1,5 +1,6 @@
 package xyz.sentiment.analysis.services;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalDouble;
@@ -21,9 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class SentimentService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SentimentService.class);
 
     @Autowired
     private SentimentCache cache;
@@ -39,16 +44,21 @@ public class SentimentService {
     @Async("asyncExecutor")
     public void computeSentiment(final String ticker, final IEXNews newsItem) {
         
+        
+        if (cache.hasBeenProcessed(ticker, newsItem.getDatetime())){
+            LOG.info("News Item for [{}] at [{}] has been processed",ticker,newsItem.getDatetime());
+            return;
+        }
+        LOG.info("Processing news for [{}] at news datetime [{}]",ticker,newsItem.getDatetime());
         OptionalDouble mainSentiment = Arrays.asList(newsItem.getHeadline(), newsItem.getSummary())
             .stream()
             .mapToDouble((line) -> processLine(line))
             .max();            
        
         double sentiment = mainSentiment.isPresent() ? mainSentiment.getAsDouble() : -1;
-        String id = md5(newsItem);
-        if (id != null){
-            cache.addItem(ticker, new SentimentTuple(id,newsItem.getDatetime(), sentiment));        
-        }
+        
+        cache.addItem(ticker, new SentimentTuple(Instant.ofEpochMilli(newsItem.getDatetime()), sentiment, ticker));        
+        
     }
 
     private int processLine(final String line) {
@@ -70,18 +80,5 @@ public class SentimentService {
         return mainSentiment;
     }
 
-    private String md5(final IEXNews newsItem){
-        try{
-            ObjectMapper mapper = new ObjectMapper();
-            String hash = mapper.writeValueAsString(newsItem);
-            return DigestUtils.md5Hex(hash);
-        } catch(Exception ex) {
-            System.out.println("Error trying to compute md5sum of "+newsItem.getHeadline());
-            ex.printStackTrace();
-        } finally {
-            // nothing really to do here
-        }
 
-        return null;
-    }
 }
